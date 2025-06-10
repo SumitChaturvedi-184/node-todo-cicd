@@ -1,15 +1,29 @@
-version: '3'
+version: '3.8'
+
 services:
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
   app:
     build: .
-    environment:
-      - DB_HOST=mongo
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
+    restart: always
+    ports:
+      - "3000:3000"
     depends_on:
       - mongo
-  mongo:
-    image: mongo:5.0
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
