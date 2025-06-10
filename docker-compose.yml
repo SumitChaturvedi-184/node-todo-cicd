@@ -1,29 +1,35 @@
 version: '3.8'
-
 services:
   mongo:
-    image: mongo
+    image: mongo:latest
+    container_name: mongo
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-      - mongo_data:/data/db
-    networks:
-      - app-network
+      - ./mongo-init:/docker-entrypoint-initdb.d  # Mount init script
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
 
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
     restart: always
+    environment:
+      DB_HOST: mongo
+      DB_PORT: 27017
+      DB_NAME: taskdb
+      DB_USER: admin
+      DB_PASS: admin
+      PORT: 3000
     ports:
       - "3000:3000"
     depends_on:
       - mongo
-    env_file:
-      - .env
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
 
 volumes:
-  mongo_data:
+  mongo-data:

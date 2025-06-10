@@ -1,0 +1,19 @@
+{
+  "name": "simple-db-app",
+  "version": "1.0.0",
+  "description": "Task Manager with MongoDB",
+  "main": "app/app.js",
+  "scripts": {
+    "start": "node app/app.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3",
+    "ejs": "^3.1.8",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}
