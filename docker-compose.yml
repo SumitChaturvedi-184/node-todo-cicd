@@ -19,6 +19,9 @@ services:
       dockerfile: Dockerfile
     container_name: app
     restart: always
+    volumes:
+      - ./app:/app           # Bind mount your app folder for live code update
+      - /app/node_modules   # Anonymous volume to prevent overwriting node_modules
     environment:
       DB_HOST: mongo
       DB_PORT: 27017
