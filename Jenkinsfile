@@ -11,15 +11,12 @@ pipeline {
                 sshagent(['deploy-key']) {
                     withCredentials([usernamePassword(credentialsId: 'mongodb-creds', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASS')]) {
                         sh """
-                            ssh root@144.126.129.8 <<'EOF'
+                            ssh root@144.126.129.8 <<EOF
                             cd ${REMOTE_APP_DIR}
-                            
-                            # Preserve existing .env if available
-                            if [ -f .env ]; then
-                                echo "Using existing .env file"
-                            else
-                                # Create new .env file securely
-                                cat <<EOT > .env
+
+                            # Create .env if missing
+                            if [ ! -f .env ]; then
+                              cat <<EOT > .env
 DB_USER=${DB_USER}
 DB_PASS=${DB_PASS}
 DB_NAME=mydb
@@ -27,23 +24,28 @@ DB_HOST=mongo
 DB_PORT=27017
 EOT
                             fi
-                            
-                            # Ensure proper file permissions
+
                             chmod 600 .env
-                            
-                            # Restart with Docker Compose
-                            docker-compose down
-                            docker-compose up -d --build
+
+                            # Pull latest code (optional if Jenkins already pulls)
+                            git pull origin main
+
+                            # Restart app container to reflect code changes
+                            docker-compose restart app
+
+                            # Clean unused images (optional)
+                            docker image prune -f
+
                             EOF
                         """
                     }
                 }
             }
         }
-        
+
         stage('Verify Deployment') {
             steps {
-                sleep 10  // Wait for app to start
+                sleep 10  // Wait for app to restart
                 sh 'curl -sSf http://144.126.129.8:3000 > /dev/null'
             }
         }
